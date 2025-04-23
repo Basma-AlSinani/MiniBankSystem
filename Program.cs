@@ -11,9 +11,29 @@ namespace MiniBankSystem
 
         static List<int> accountNumber = new List<int>();
         static List<double> balances = new List<double>();
-        static void Main(string[] args)
+        static List<string> registedNationalDs = new List<string>();
+        static void Main()
         {
-            Console.WriteLine("Hello, World!");
+            bool running = true;
+            while (running)
+            {
+                Console.Clear();
+                Console.WriteLine("Welcome to bank system");
+                Console.WriteLine("1.User Menu");
+                Console.WriteLine("2.Admin Menu");
+                Console.WriteLine("0.Exit");
+                Console.WriteLine("Select Option: ");
+                string mainChoice = Console.ReadLine();
+
+                switch (mainChoice)
+                {
+                    case "1":UserMenu();break;
+                    case "2": AdminMenu(); break;
+                    //case "0":
+                    default: Console.WriteLine("Invalid choice."); break;
+                }
+
+            }
         }
         //User Menue
         static void UserMenu()
@@ -72,10 +92,24 @@ namespace MiniBankSystem
 
             Console.WriteLine("Enter your National ID:");
             string NationalID = Console.ReadLine();
+            //check if the national id is already registerd
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(NationalID))
+            {
+                Console.WriteLine("This National Id and name cannot be empty.Plase try agian!!");
+                return;
+            }
+            if (registedNationalDs.Contains(NationalID))
+            {
+                Console.WriteLine("This National ID is already registered. Please try again.");
+                return;
+            }
             // Combine the name and National ID into a single string formatted as "name|NationalID"
             string request = name + "|" + NationalID;
+            
             // Add the formatted request string into a queue for account creation processing
             createAccountRequests.Enqueue(request);
+            registedNationalDs.Add(NationalID);
+            Console.WriteLine("Requst submitted successfuly.");
         }
         static void Deposit()
         {
@@ -123,23 +157,30 @@ namespace MiniBankSystem
         {
 
         }
+        // Method to retrieve the index of an account number from the accountNumber list
         static int GetAccountIndex()
         {
             Console.WriteLine("Enter account number: ");
             try
             {
+                // Attempt to read the user's input and convert it to an integer
                 int AccNum = Convert.ToInt32(Console.ReadLine());
+                // Search for the account number in the accountNumber list and get its index
                 int index = accountNumber.IndexOf(AccNum);
+                // If the account number is not found (index == -1), inform the user and return -1
                 if (index == -1)
                 {
                     Console.WriteLine("Account Not Found!!");
                     return -1;
                 }
+                // If the account number is found, return its index
                 return index;
             }
             catch
             {
+                // Handle invalid input (e.g., non-numeric value entered by the user)
                 Console.WriteLine("Invaild Input.");
+                // Return -1 to indicate an error occurred
                 return -1;
             }
     }
