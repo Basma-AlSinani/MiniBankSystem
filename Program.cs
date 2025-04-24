@@ -12,9 +12,14 @@ namespace MiniBankSystem
         static List<int> accountNumber = new List<int>();
         static List<double> balances = new List<double>();
         static List<string> registedNationalDs = new List<string>();
+        static List<string> AccountName = new List<string>();
+
+        static int lastAccountNumber;
         static void Main()
         {
-            bool running = true;
+            accountNumber.Add(0);
+            balances.Add(0);
+        bool running = true;
             while (running)
             {
                 Console.Clear();
@@ -29,7 +34,11 @@ namespace MiniBankSystem
                 {
                     case "1":UserMenu();break;
                     case "2": AdminMenu(); break;
-                    //case "0":
+                    case "0":
+                       // SaveAccountsInformationToFile();
+                       // SaveReviews();
+                        running = false;
+                        break;
                     default: Console.WriteLine("Invalid choice."); break;
                 }
 
@@ -75,6 +84,7 @@ namespace MiniBankSystem
                 Console.Clear();
                 Console.WriteLine("    Admain Menu    ");
                 Console.WriteLine("1.Process Next Account Request");
+                Console.WriteLine("0. Return to Main Menu");
                 string adminChoice = Console.ReadLine();
                 switch (adminChoice)
                 {
@@ -101,6 +111,7 @@ namespace MiniBankSystem
             if (registedNationalDs.Contains(NationalID))
             {
                 Console.WriteLine("This National ID is already registered. Please try again.");
+                Console.ReadLine();
                 return;
             }
             // Combine the name and National ID into a single string formatted as "name|NationalID"
@@ -110,34 +121,51 @@ namespace MiniBankSystem
             createAccountRequests.Enqueue(request);
             registedNationalDs.Add(NationalID);
             Console.WriteLine("Requst submitted successfuly.");
+            Console.ReadLine();
         }
         static void Deposit()
         {
+          
             // Get the index of the account where money will be deposited
             int index = GetAccountIndex();
             // If the account index is invalid (-1), exit the method
             if (index == -1) return;
+            //{
+            //    Console.WriteLine("Account Not found!");
+            //    return;
+            //}
             try
             {
                 //ask user to enter deposit amount
                 Console.WriteLine("Enter deposit amount: ");
                 // Convert the user input into a double (decimal value)
+                
                 double amount = Convert.ToDouble(Console.ReadLine());
                 // Validate that the deposit amount is greater than 0
                 if (amount <= 0)
                 {
                     Console.WriteLine("Amount must be positive.");// Inform the user of invalid input
+                    Console.ReadLine();
                     return;//Exit the metthod
+                }
+                if (amount < 1)
+                {
+                    Console.WriteLine("Minimum depostit amount is 1 OMR!");
+                      Console.ReadLine();
+                    return;
                 }
                 // Add the deposit amount to the account balance at the specified index
                 balances[index] += amount;
                 Console.WriteLine("Deposit Successful.");// Confirm successful deposit
             }
-            catch
+            catch 
             {
                 // Handle invalid input (e.g., user enters a non-numeric value)
                 Console.WriteLine("Invalid amount");
             }
+            Console.WriteLine("Press Enter to continue.");
+            Console.ReadLine();
+
             }
 
         
@@ -155,12 +183,29 @@ namespace MiniBankSystem
         }
         static void ProcessNextAccountRequest()
         {
+            if (createAccountRequests.Count == 0)
+            {
+                Console.WriteLine("No pending account requests.");
+                return;
+            }
+            string request = createAccountRequests.Dequeue();
+            string[] parts = request.Split('|');
+            string name = parts[0];
+            string nationalID = parts[1];
+            int NewAccountNumber = lastAccountNumber + 1;
 
+            accountNumber.Add(NewAccountNumber);
+            AccountName.Add(name);
+            balances.Add(0.0);
+            lastAccountNumber = NewAccountNumber;
+            Console.WriteLine($"Account created for {name} with Account Number:{NewAccountNumber}");
+            Console.ReadLine();
         }
         // Method to retrieve the index of an account number from the accountNumber list
         static int GetAccountIndex()
         {
             Console.WriteLine("Enter account number: ");
+            
             try
             {
                 // Attempt to read the user's input and convert it to an integer
@@ -171,6 +216,7 @@ namespace MiniBankSystem
                 if (index == -1)
                 {
                     Console.WriteLine("Account Not Found!!");
+                    Console.ReadLine();
                     return -1;
                 }
                 // If the account number is found, return its index
@@ -180,6 +226,7 @@ namespace MiniBankSystem
             {
                 // Handle invalid input (e.g., non-numeric value entered by the user)
                 Console.WriteLine("Invaild Input.");
+                Console.ReadLine();
                 // Return -1 to indicate an error occurred
                 return -1;
             }
