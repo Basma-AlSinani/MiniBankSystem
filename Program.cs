@@ -17,13 +17,17 @@ namespace MiniBankSystem
         static Stack<string> reviewsStack = new Stack<string>();
 
         const double MinimumBalance = 100.0;
+        const string AccountsFilePath = "accounts.txt";
+        const string ReviewsFilePath = "reviews.txt";
 
         static int lastAccountNumber=0;
         static void Main()
         {
             //accountNumber.Add(0);
             //balances.Add(0);
-           
+            LoadAccountsInformationFromFile();
+            LoadReviews();
+
             bool running = true;
             while (running)
             {
@@ -40,8 +44,8 @@ namespace MiniBankSystem
                     case "1": UserMenu(); break;
                     case "2": AdminMenu(); break;
                     case "0":
-                        // SaveAccountsInformationToFile();
-                        // SaveReviews();
+                        LoadAccountsInformationFromFile();
+                        SaveReviews();
                         running = false;
                         break;
                     default: Console.WriteLine("Invalid choice."); break;
@@ -61,7 +65,7 @@ namespace MiniBankSystem
                 Console.WriteLine("2.Deposit");
                 Console.WriteLine("3.Withdraw");
                 Console.WriteLine("4.View Balance");
-                Console.WriteLine("5.Submit Riview/Complaint");
+                Console.WriteLine("5.Submit Riview");
                 Console.WriteLine("0.Return to main menu");
                 Console.WriteLine("Select option");
                 string userChoies = Console.ReadLine();
@@ -89,6 +93,9 @@ namespace MiniBankSystem
                 Console.Clear();
                 Console.WriteLine("    Admain Menu    ");
                 Console.WriteLine("1.Process Next Account Request");
+                Console.WriteLine("2.View Submitted Reviews");
+                Console.WriteLine("3.View All Accounts");
+                Console.WriteLine("4.View Pending Account Requests");
                 Console.WriteLine("0. Return to Main Menu");
                 string adminChoice = Console.ReadLine();
                 switch (adminChoice)
@@ -243,13 +250,16 @@ namespace MiniBankSystem
             Console.WriteLine("Press Enter to continue.");
             Console.ReadLine();
         }
+        //user submeits review
         static void SubmitRiview()
         {
-            Console.Write("Enter your rivew: ");
+            Console.Write("Enter your reviw: ");
+            //read the review input frome user
             string review = Console.ReadLine();
+            //add (push) the review to the top of the review stack
             reviewsStack.Push(review);
             Console.WriteLine("Thank you! Your feedback has been recorded.");
-            Console.ReadLine();
+            Console.ReadLine();//to allow user to read the massege before continuing
         }
         static void ProcessNextAccountRequest()
         {
@@ -324,17 +334,121 @@ namespace MiniBankSystem
         }
         static void ViewReviews()
         {
-
+            //check if there are no reviews submeitted yet
+            if (reviewsStack.Count == 0)
+            {
+                Console.WriteLine("No reviews submeitted yet!");
+                Console.ReadLine();
+                return;//exit method
+            }
+            //if there are rivews 
+            Console.WriteLine("Recent Reviews:");
+            //loop through each review in stak
+            foreach(string Re in reviewsStack)
+            {
+                //display each review
+                Console.WriteLine("- " + Re);
+               Console.ReadLine();
+            }
+            Console.WriteLine("Press Enter to continue.");
+            Console.ReadLine();
         }
          
         static void ViewAllAccounts()
         {
-
+            Console.WriteLine("== All Accounts ==");
+            //check if there are no account
+            if (accountNumber.Count == 0)
+            {
+                Console.WriteLine("NO Acount FOUND!!");
+            }else
+                //loop through all accounts and display their detalis
+            for(int i = 0; i < accountNumber.Count; i++)
+            {
+                Console.WriteLine($"Account Number: {accountNumber[i]}\nName: {AccountName[i]}\nBalance: {balances[i]}");
+                Console.WriteLine("------------");
+            }
+            // After displaying all accounts, wait for user to press Enter
+            Console.WriteLine("press Enter to Continue");
+            Console.ReadLine();
         }
         static void ViewPendingRequests()
         {
+            Console.WriteLine("== Pending Account Requests ==");
+            if (createAccountRequests.Count == 0)
+            {
+                Console.WriteLine("No pending requests.");
+                Console.ReadLine();
+                return;
+            }
+            foreach(string request in createAccountRequests)
+            {
+                string[] parts = request.Split('|');
+                Console.WriteLine($"Name: {parts[0]}, National ID: {parts[1]}");
+                Console.ReadLine();
+            }
+        }
+        static void LoadAccountsInformationFromFile()
+        {
+            try
+            {
+                using(StreamWriter writer=new StreamWriter(AccountsFilePath))
+                {
+                    for(int i = 0; i < accountNumber.Count; i++)
+                    {
+                        string dataLine = $"{accountNumber[i]},{AccountName[i]},{balances[i]}";
+                        writer.WriteLine(dataLine);
+                    }
+                }
+                Console.WriteLine("Account saved successfully");
+            }
+            catch
+            {
+                Console.WriteLine("Error saving file");
+            }
 
         }
+        static void SaveReviews()
+        {
+            {
+                try
+                {
+                    using (StreamWriter writer = new StreamWriter(ReviewsFilePath))
+                    {
+                        foreach (var review in reviewsStack)
+                        {
+                            writer.WriteLine(review);
+                        }
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Error saving reviews.");
+                }
+            }
+        }
+        static void LoadReviews()
+        {
+            try
+            {
+                if (!File.Exists(ReviewsFilePath)) return;
+
+                using (StreamReader reader = new StreamReader(ReviewsFilePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        reviewsStack.Push(line);
+                    }
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error loading reviews.");
+            }
+        }
+
+
     }
 }
 
