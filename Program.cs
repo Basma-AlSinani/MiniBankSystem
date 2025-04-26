@@ -14,6 +14,8 @@ namespace MiniBankSystem
         static List<string> registedNationalDs = new List<string>();
         static List<string> AccountName = new List<string>();
 
+        static Stack<string> reviewsStack = new Stack<string>();
+
         const double MinimumBalance = 100.0;
 
         static int lastAccountNumber=0;
@@ -226,12 +228,15 @@ namespace MiniBankSystem
         {
             int index = GetAccountIndex();
             if (index == -1) return;
+            //check if the account index is vaild and the account data exists
             if (index < 0 || index >= accountNumber.Count || index >= AccountName.Count || index >= balances.Count)
             {
+                //print error message if the account data invaild  
                 Console.WriteLine("ERROR:Acount information is missing.");
                 Console.ReadLine();
                 return;
             }
+            //if index vaild display account details
             Console.WriteLine($"Account Number: {accountNumber[index]}");
             Console.WriteLine($"Holder Name: {AccountName[index]}");
             Console.WriteLine($"Current Balance:{balances[index]}");
@@ -240,7 +245,11 @@ namespace MiniBankSystem
         }
         static void SubmitRiview()
         {
-
+            Console.Write("Enter your rivew: ");
+            string review = Console.ReadLine();
+            reviewsStack.Push(review);
+            Console.WriteLine("Thank you! Your feedback has been recorded.");
+            Console.ReadLine();
         }
         static void ProcessNextAccountRequest()
         {
@@ -317,7 +326,7 @@ namespace MiniBankSystem
         {
 
         }
-
+         
         static void ViewAllAccounts()
         {
 
