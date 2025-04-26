@@ -161,7 +161,8 @@ namespace MiniBankSystem
                 }
                 // Add the deposit amount to the account balance at the specified index
                 balances[index] += amount;
-                Console.WriteLine("Deposit Successful.");// Confirm successful deposit
+                //Display balance after deposit
+                Console.WriteLine($"Deposit Successful.New Balance: {balances[index]}");// Confirm successful deposit
             }
             catch
             {
@@ -179,39 +180,54 @@ namespace MiniBankSystem
             //get the index of account to withdraw from
             int index = GetAccountIndex();
             if (index == -1) return;
-            try
+            while (true)
             {
-                Console.WriteLine("Enter Withdraw amount: ");
-                //read and convert the input amount
-                double amount = Convert.ToDouble(Console.ReadLine());
-                //validate that the amount positive
-                if (amount <= 0)
+                try
                 {
-                    Console.WriteLine("The amount must be positive");
-                    return;
-                }
-                // Check if the balance after withdrawal  greterthan or equal MinimumBalance
-                if (balances[index]-amount>= MinimumBalance)
-                {
-                    //to Withdraw
-                    balances[index] -= amount;
-                    Console.WriteLine("Withdrawal successful.");
+                    Console.WriteLine("Enter Withdraw amount: ");
+                    //read and convert the input amount
+                    double amount = Convert.ToDouble(Console.ReadLine());
+                    //validate that the amount positive
+                    if (amount == 0)
+                    {
+                        Console.WriteLine("Withdraw cancelled");
+                        break;
+                    }
+                    if (amount < 0)
+                    {
+                        Console.WriteLine("The amount must be positive");
+                        continue;
+                    }
+                    // Check if the balance after withdrawal  greterthan or equal MinimumBalance
+                    if (balances[index] - amount >= MinimumBalance)
+                    {
+                        //to Withdraw
+                        balances[index] -= amount;
+                        Console.WriteLine($"Withdrawal successful.New Balance: {balances[index]}");
+                        Console.ReadLine();
+                        break;
 
+                    }
+                    else
+                    {
+                        Console.WriteLine("Insufficient balance after minimum limit");
+                        continue;
+                    }
                 }
-                else
+                catch
                 {
-                    Console.WriteLine("nsufficient balance after minimum limit");
+                    //to handel invalid input
+                    Console.WriteLine("Invalid amount");
                 }
-            }
-            catch
-            {
-                //to handel invalid input
-                Console.WriteLine("Invalid amount");
             }
         }
         static void ViewBalance()
         {
-
+            int index = GetAccountIndex();
+            if (index == -1) return;
+            Console.WriteLine($"Account Number: {accountNumber[index]}");
+            Console.WriteLine($"Holder Name: {AccountName[index]}");
+            Console.WriteLine($"Current Balance:{balances[index]}");
         }
         static void SubmitRiview()
         {
@@ -250,31 +266,34 @@ namespace MiniBankSystem
         // Method to retrieve the index of an account number from the accountNumber list
         static int GetAccountIndex()
         {
-            Console.WriteLine("Enter account number: ");
+            while (true)// Keep asking until the user enters a valid account number
+            {
+                Console.WriteLine("Enter account number: ");
 
-            try
-            {
-                // Attempt to read the user's input and convert it to an integer
-                int AccNum = Convert.ToInt32(Console.ReadLine());
-                // Search for the account number in the accountNumber list and get its index
-                int index = accountNumber.IndexOf(AccNum);
-                // If the account number is not found (index == -1), inform the user and return -1
-                if (index == -1)
+                try
                 {
-                    Console.WriteLine("Account Not Found!!");
-                    Console.ReadLine();
-                    return -1;
+                    // Attempt to read the user's input and convert it to an integer
+                    int AccNum = Convert.ToInt32(Console.ReadLine());
+                    // Search for the account number in the accountNumber list and get its index
+                    int index = accountNumber.IndexOf(AccNum);
+                    // If the account number is not found (index == -1), inform the user and return -1
+                    if (index == -1)
+                    {
+                        //if account not found inform the user and ask again
+                        Console.WriteLine("Account not found! Please enter a valid account number.");
+                        continue;//try agin
+                    }
+                    // If vaild account number is found, return its index
+                    return index;
                 }
-                // If the account number is found, return its index
-                return index;
-            }
-            catch
-            {
-                // Handle invalid input (e.g., non-numeric value entered by the user)
-                Console.WriteLine("Invaild Input.");
-                Console.ReadLine();
-                // Return -1 to indicate an error occurred
-                return -1;
+                catch
+                {
+                    //if not vaild inform the user and ask agin
+                    Console.WriteLine("Invaild Input.Please enter a valid number.");
+                   // Console.ReadLine();
+                    // Return -1 to indicate an error occurred
+                    //return -1;
+                }
             }
         }
         static void ViewReviews()
