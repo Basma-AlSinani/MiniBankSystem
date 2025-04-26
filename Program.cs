@@ -16,11 +16,12 @@ namespace MiniBankSystem
 
         const double MinimumBalance = 100.0;
 
-        static int lastAccountNumber;
+        static int lastAccountNumber=0;
         static void Main()
         {
-            accountNumber.Add(0);
-            balances.Add(0);
+            //accountNumber.Add(0);
+            //balances.Add(0);
+           
             bool running = true;
             while (running)
             {
@@ -225,9 +226,17 @@ namespace MiniBankSystem
         {
             int index = GetAccountIndex();
             if (index == -1) return;
+            if (index < 0 || index >= accountNumber.Count || index >= AccountName.Count || index >= balances.Count)
+            {
+                Console.WriteLine("ERROR:Acount information is missing.");
+                Console.ReadLine();
+                return;
+            }
             Console.WriteLine($"Account Number: {accountNumber[index]}");
             Console.WriteLine($"Holder Name: {AccountName[index]}");
             Console.WriteLine($"Current Balance:{balances[index]}");
+            Console.WriteLine("Press Enter to continue.");
+            Console.ReadLine();
         }
         static void SubmitRiview()
         {
@@ -266,7 +275,9 @@ namespace MiniBankSystem
         // Method to retrieve the index of an account number from the accountNumber list
         static int GetAccountIndex()
         {
-            while (true)// Keep asking until the user enters a valid account number
+            int Attempts= 0;
+            const int MaxAttempts = 3;
+            while (Attempts<MaxAttempts)// Keep asking until the user enters a valid account number
             {
                 Console.WriteLine("Enter account number: ");
 
@@ -279,8 +290,9 @@ namespace MiniBankSystem
                     // If the account number is not found (index == -1), inform the user and return -1
                     if (index == -1)
                     {
+                        Attempts++;
                         //if account not found inform the user and ask again
-                        Console.WriteLine("Account not found! Please enter a valid account number.");
+                        Console.WriteLine($"Account not found! You Have {MaxAttempts-Attempts}attempts");
                         continue;//try agin
                     }
                     // If vaild account number is found, return its index
@@ -290,11 +302,16 @@ namespace MiniBankSystem
                 {
                     //if not vaild inform the user and ask agin
                     Console.WriteLine("Invaild Input.Please enter a valid number.");
+                    Attempts++;
                    // Console.ReadLine();
                     // Return -1 to indicate an error occurred
                     //return -1;
                 }
             }
+            Console.WriteLine("You have exceeded the maximum number of attempts. Returning to main menu.");
+            Console.ReadLine();
+            return -1;
+            
         }
         static void ViewReviews()
         {
