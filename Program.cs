@@ -183,21 +183,31 @@ namespace MiniBankSystem
         }
         static void ProcessNextAccountRequest()
         {
+            //check if there are any pending account creation requests.
             if (createAccountRequests.Count == 0)
             {
                 Console.WriteLine("No pending account requests.");
                 return;
             }
+            //dequeue the next account creation request from the queue.
             string request = createAccountRequests.Dequeue();
+            //to spilt the requst string by using |.
             string[] parts = request.Split('|');
+            //extract the name frome request
             string name = parts[0];
+            //extract the ID frome request
             string nationalID = parts[1];
+            //generate a new account number based on the lastAccountNumber.
             int NewAccountNumber = lastAccountNumber + 1;
-
+            //add account to list of account number
             accountNumber.Add(NewAccountNumber);
+            //add name to list of account names
             AccountName.Add(name);
+            //initialize the account balance to zero for the new account and add it to the balance list.
             balances.Add(0.0);
+            //update to add new account 
             lastAccountNumber = NewAccountNumber;
+            //message to user successful account creation
             Console.WriteLine($"Account created for {name} with Account Number:{NewAccountNumber}");
             Console.ReadLine();
         }
