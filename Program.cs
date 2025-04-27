@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
+
 namespace MiniBankSystem
 {
     class Program
@@ -13,20 +14,25 @@ namespace MiniBankSystem
         static List<double> balances = new List<double>();
         static List<string> registedNationalDs = new List<string>();
         static List<string> AccountName = new List<string>();
+        // static List<string> Password = new List<string>();
 
         static Stack<string> reviewsStack = new Stack<string>();
 
         const double MinimumBalance = 100.0;
         const string AccountsFilePath = "accounts.txt";
         const string ReviewsFilePath = "reviews.txt";
+        const string RequestsFilePath = "requests.txt";
+        const string AdminPassword = "1233";
 
-        static int lastAccountNumber=0;
+        static int lastAccountNumber = 0;
         static void Main()
         {
             //accountNumber.Add(0);
             //balances.Add(0);
             LoadAccountsInformationFromFile();
             LoadReviews();
+            LoadRequests();
+
 
             bool running = true;
             while (running)
@@ -41,17 +47,91 @@ namespace MiniBankSystem
 
                 switch (mainChoice)
                 {
-                    case "1": UserMenu(); break;
-                    case "2": AdminMenu(); break;
+                    case "1": UserAccess(); break;
+                    case "2": if (AdmainLogin()) AdminMenu(); break;
                     case "0":
-                        LoadAccountsInformationFromFile();
+                        SaveAccountsInformationFromFile();
                         SaveReviews();
+                        SaveRequests();
                         running = false;
                         break;
                     default: Console.WriteLine("Invalid choice."); break;
                 }
 
             }
+        }
+        //usre Login
+        static void UserAccess()
+        {
+            bool inAccessMenue = true;
+            while (inAccessMenue)
+            {
+                Console.Clear();
+                Console.WriteLine("  User Access  ");
+                Console.WriteLine("1.Request Account Creation");
+                Console.WriteLine("2.Login to Existing Account");
+                Console.WriteLine("0.Return to main menu");
+                Console.WriteLine("Select Option: ");
+                string choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "1": RequestAccountCreation(); break;
+                    case "2":
+                        if (UserLogin())
+                            UserMenu(); break;
+                    case "0": inAccessMenue = false; break;
+                    default:
+                        Console.WriteLine("Invalid choice. Press Enter to try again.");
+                        Console.ReadLine();
+                        break;
+                }
+
+            }
+        }
+        static bool UserLogin()
+        {
+            Console.WriteLine("Enter you account number: ");
+            try
+            {
+                int accNum = Convert.ToInt32(Console.ReadLine());
+                int index = accountNumber.IndexOf(accNum);
+                if (index != -1)
+                {
+                    Console.WriteLine($"Welcome,{AccountName[index]}!");
+                    Console.ReadLine();
+                    return true;
+                }
+                else {
+                    Console.WriteLine("Account not found!");
+                    Console.ReadLine();
+                    return false;
+
+                }
+            } catch
+            {
+                Console.WriteLine("Invaild Input");
+                Console.ReadLine();
+                return false;
+            }
+        }
+        //Admain Login
+        static bool AdmainLogin()
+        {
+            Console.WriteLine("Enter Admain Password: ");
+            string Password = Console.ReadLine();
+            if (Password == AdminPassword)
+            {
+                Console.WriteLine("Login Successful.Welcome Admin!");
+                Console.ReadLine();
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Incorrect password!");
+                Console.ReadLine();
+                return false;
+            }
+
         }
         //User Menue
         static void UserMenu()
@@ -61,22 +141,22 @@ namespace MiniBankSystem
             {
                 Console.Clear();
                 Console.WriteLine("    User Menu    ");
-                Console.WriteLine("1.Request Account Creation");
-                Console.WriteLine("2.Deposit");
-                Console.WriteLine("3.Withdraw");
-                Console.WriteLine("4.View Balance");
-                Console.WriteLine("5.Submit Riview");
+                //Console.WriteLine("1.Request Account Creation");
+                Console.WriteLine("1.Deposit");
+                Console.WriteLine("2.Withdraw");
+                Console.WriteLine("3.View Balance");
+                Console.WriteLine("4.Submit Riview");
                 Console.WriteLine("0.Return to main menu");
                 Console.WriteLine("Select option");
                 string userChoies = Console.ReadLine();
 
                 switch (userChoies)
                 {
-                    case "1": RequestAccountCreation(); break;
-                    case "2": Deposit(); break;
-                    case "3": Withdraw(); break;
-                    case "4": ViewBalance(); break;
-                    case "5": SubmitRiview(); break;
+                    //case "1": RequestAccountCreation(); break;
+                    case "1": Deposit(); break;
+                    case "2": Withdraw(); break;
+                    case "3": ViewBalance(); break;
+                    case "4": SubmitRiview(); break;
                     case "0": inUserMenue = false; break;
                     default: Console.WriteLine("Invalid choice."); break;
 
@@ -121,6 +201,12 @@ namespace MiniBankSystem
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(NationalID))
             {
                 Console.WriteLine("This National Id and name cannot be empty.Plase try agian!!");
+                return;
+            }
+            if (NationalID.Length < 7 || NationalID.Length > 10)
+            {
+                Console.WriteLine("The National ID must be between 7 and 10 digits. Please try again!");
+                Console.ReadLine();
                 return;
             }
             if (registedNationalDs.Contains(NationalID))
@@ -294,9 +380,9 @@ namespace MiniBankSystem
         // Method to retrieve the index of an account number from the accountNumber list
         static int GetAccountIndex()
         {
-            int Attempts= 0;
+            int Attempts = 0;
             const int MaxAttempts = 3;
-            while (Attempts<MaxAttempts)// Keep asking until the user enters a valid account number
+            while (Attempts < MaxAttempts)// Keep asking until the user enters a valid account number
             {
                 Console.WriteLine("Enter account number: ");
 
@@ -311,7 +397,7 @@ namespace MiniBankSystem
                     {
                         Attempts++;
                         //if account not found inform the user and ask again
-                        Console.WriteLine($"Account not found! You Have {MaxAttempts-Attempts}attempts");
+                        Console.WriteLine($"Account not found! You Have {MaxAttempts - Attempts}attempts");
                         continue;//try agin
                     }
                     // If vaild account number is found, return its index
@@ -322,7 +408,7 @@ namespace MiniBankSystem
                     //if not vaild inform the user and ask agin
                     Console.WriteLine("Invaild Input.Please enter a valid number.");
                     Attempts++;
-                   // Console.ReadLine();
+                    // Console.ReadLine();
                     // Return -1 to indicate an error occurred
                     //return -1;
                 }
@@ -330,7 +416,7 @@ namespace MiniBankSystem
             Console.WriteLine("You have exceeded the maximum number of attempts. Returning to main menu.");
             Console.ReadLine();
             return -1;
-            
+
         }
         static void ViewReviews()
         {
@@ -344,16 +430,16 @@ namespace MiniBankSystem
             //if there are rivews 
             Console.WriteLine("Recent Reviews:");
             //loop through each review in stak
-            foreach(string Re in reviewsStack)
+            foreach (string Re in reviewsStack)
             {
                 //display each review
                 Console.WriteLine("- " + Re);
-               Console.ReadLine();
+                Console.ReadLine();
             }
             Console.WriteLine("Press Enter to continue.");
             Console.ReadLine();
         }
-         
+
         static void ViewAllAccounts()
         {
             Console.WriteLine("== All Accounts ==");
@@ -361,13 +447,13 @@ namespace MiniBankSystem
             if (accountNumber.Count == 0)
             {
                 Console.WriteLine("NO Acount FOUND!!");
-            }else
+            } else
                 //loop through all accounts and display their detalis
-            for(int i = 0; i < accountNumber.Count; i++)
-            {
-                Console.WriteLine($"Account Number: {accountNumber[i]}\nName: {AccountName[i]}\nBalance: {balances[i]}");
-                Console.WriteLine("------------");
-            }
+                for (int i = 0; i < accountNumber.Count; i++)
+                {
+                    Console.WriteLine($"Account Number: {accountNumber[i]}\nName: {AccountName[i]}\nBalance: {balances[i]}");
+                    Console.WriteLine("------------");
+                }
             // After displaying all accounts, wait for user to press Enter
             Console.WriteLine("press Enter to Continue");
             Console.ReadLine();
@@ -381,74 +467,149 @@ namespace MiniBankSystem
                 Console.ReadLine();
                 return;
             }
-            foreach(string request in createAccountRequests)
+            foreach (string request in createAccountRequests)
             {
                 string[] parts = request.Split('|');
                 Console.WriteLine($"Name: {parts[0]}, National ID: {parts[1]}");
                 Console.ReadLine();
             }
         }
-        static void LoadAccountsInformationFromFile()
+
+        static void SaveAccountsInformationFromFile()
         {
             try
             {
-                using(StreamWriter writer=new StreamWriter(AccountsFilePath))
+                using (StreamWriter writer = new StreamWriter(AccountsFilePath))
                 {
-                    for(int i = 0; i < accountNumber.Count; i++)
+                    for (int i = 0; i < accountNumber.Count; i++)
                     {
                         string dataLine = $"{accountNumber[i]},{AccountName[i]},{balances[i]}";
                         writer.WriteLine(dataLine);
                     }
                 }
-                Console.WriteLine("Account saved successfully");
+                Console.WriteLine("Accounts saved successfully.");
             }
             catch
             {
-                Console.WriteLine("Error saving file");
+                Console.WriteLine("Error saving file.");
             }
+        }
 
+        static void LoadAccountsInformationFromFile()
+        {
+            if (!File.Exists(AccountsFilePath))
+            {
+                Console.WriteLine("No saved data found.");
+                return;
+            }
+            try
+            {
+
+
+                accountNumber.Clear();
+                AccountName.Clear();
+                balances.Clear();
+                using (StreamReader reader = new StreamReader(AccountsFilePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        string[] parts = line.Split(',');
+                        int accNum = Convert.ToInt32(parts[0]);
+                        accountNumber.Add(accNum);
+                        AccountName.Add(parts[1]);
+                        balances.Add(Convert.ToDouble(parts[2]));
+
+                        if (accNum > lastAccountNumber)
+                            lastAccountNumber = accNum;
+                    }
+                }
+
+                Console.WriteLine("Accounts loaded successfully.");
+            }
+            catch
+            {
+                Console.WriteLine("Error loading file.");
+            }
         }
         static void SaveReviews()
-        {
+            {
+                {
+                    try
+                    {
+                        using (StreamWriter writer = new StreamWriter(ReviewsFilePath))
+                        {
+                            foreach (var review in reviewsStack)
+                            {
+                                writer.WriteLine(review);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Error saving reviews.");
+                    }
+                }
+            }
+            static void LoadReviews()
             {
                 try
                 {
-                    using (StreamWriter writer = new StreamWriter(ReviewsFilePath))
+                    if (!File.Exists(ReviewsFilePath)) return;
+
+                    using (StreamReader reader = new StreamReader(ReviewsFilePath))
                     {
-                        foreach (var review in reviewsStack)
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
                         {
-                            writer.WriteLine(review);
+                            reviewsStack.Push(line);
                         }
                     }
                 }
                 catch
                 {
-                    Console.WriteLine("Error saving reviews.");
+                    Console.WriteLine("Error loading reviews.");
                 }
             }
-        }
-        static void LoadReviews()
-        {
-            try
-            {
-                if (!File.Exists(ReviewsFilePath)) return;
 
-                using (StreamReader reader = new StreamReader(ReviewsFilePath))
+            static void SaveRequests()
+            {
+                try
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    using (StreamWriter writer = new StreamWriter(RequestsFilePath))
                     {
-                        reviewsStack.Push(line);
+                        foreach (var request in createAccountRequests)
+                        {
+                            writer.WriteLine(request);
+                        }
                     }
                 }
+                catch
+                {
+                    Console.WriteLine("Error savin account requests.");
+                }
             }
-            catch
+            static void LoadRequests()
             {
-                Console.WriteLine("Error loading reviews.");
+                try
+                {
+                    if (!File.Exists(RequestsFilePath)) return;
+                    using (StreamReader reader = new StreamReader(RequestsFilePath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            createAccountRequests.Enqueue(line);
+                        }
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Error lodaing account requests.");
+                }
             }
+
         }
-
-
     }
-}
+
 
